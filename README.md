@@ -1,2 +1,2 @@
 # BASE_MODELS
-Base models librairy needed for a few scientific computing libraries.
+Base models library needed for a few scientific computing libraries.
