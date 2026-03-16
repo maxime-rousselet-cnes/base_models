@@ -1,6 +1,5 @@
 """
-Tests the BASE_MODELS package implementation.
-To be called by pytest test.py
+To test the package. To be called by pytest test.py.
 """
 
 from numpy import array
