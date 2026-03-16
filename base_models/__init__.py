@@ -31,4 +31,4 @@ class BoundaryCondition(Enum):
 # Earth mean radius (m).
 EARTH_RADIUS = 6.371e6
 
-[load_base_model, load_complex_array, save_base_model, save_complex_array, TEST_PATH]
+to_import = [load_base_model, load_complex_array, save_base_model, save_complex_array, TEST_PATH]

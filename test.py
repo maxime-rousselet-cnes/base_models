@@ -5,7 +5,7 @@ To be called by pytest test.py
 
 from numpy import array
 
-from BASE_MODELS import (
+from base_models import (
     TEST_PATH,
     load_base_model,
     load_complex_array,
