@@ -28,7 +28,7 @@ def evaluate_terminal_parameters(
 
 
 def partial_symbols(
-    parameter: str, state_vector_line: list[Expr]
+    parameter: Expr, state_vector_line: list[Expr]
 ) -> tuple[list[Expr], MutableDenseMatrix]:
     """
     Generates the list of partial derivative symbols for a given parameter and state vector.
