@@ -31,6 +31,9 @@ DATA_PATH = Path("../common_data")
 ## Tests.
 TEST_PATH = DATA_PATH.joinpath("tests")
 
+### Test figures.
+TEST_FIGURES_PATH = TEST_PATH.joinpath("figures")
+
 ## Inputs.
 INPUTS_PATH = DATA_PATH.joinpath("inputs")
 
@@ -42,27 +45,3 @@ LOVE_NUMBERS_PATH = OUTPUTS_PATH.joinpath("love_numbers")
 
 ### Parallel computing logs.
 LOGS_PATH = OUTPUTS_PATH.joinpath("logs")
-
-
-def get_love_numbers_subpath(model_id: str, n: int, period: float) -> Path:
-    """
-    Generates the path to save the y_i system integration results for a given model.
-    """
-    return (
-        LOVE_NUMBERS_PATH.joinpath("INDIVIDUAL_LOVE_NUMBERS")
-        .joinpath(model_id)
-        .joinpath(str(n))
-        .joinpath(str(period))
-    )
-
-
-def get_interpolated_love_numbers_subpath(periods_id: str, rheological_model_id: str) -> Path:
-    """
-    Gets the path for Love numbers of a given rheological model interpolated on given periods.
-    """
-
-    return (
-        LOVE_NUMBERS_PATH.joinpath("INTERPOLATED_LOVE_NUMBERS")
-        .joinpath(periods_id)
-        .joinpath(rheological_model_id)
-    )

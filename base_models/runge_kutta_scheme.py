@@ -4,18 +4,7 @@ Custom RK45 numerical integration scheme thread-safe and multiprocess-safe.
 
 from typing import Callable, Optional
 
-from numpy import (
-    array,
-    complex128,
-    float64,
-    iscomplexobj,
-    isfinite,
-    isinf,
-    isnan,
-    maximum,
-    ndarray,
-    prod,
-)
+from numpy import array, complex128, float64, inf, iscomplexobj, isinf, isnan, maximum, ndarray
 
 FIRST_STEP_FACTOR = 1e-10
 
@@ -35,7 +24,7 @@ DOPRI_B_ALT = array([5179 / 57600, 0, 7571 / 16695, 393 / 640, -92097 / 339200, 
 
 
 def compute_stages(
-    fun: Callable, time: float, step: float, y: ndarray, parameters: Optional[ndarray] = None
+    fun: Callable, t: float, step: float, y: ndarray, parameters: Optional[ndarray] = None
 ) -> list[ndarray]:
     """
     Compute intermediate RK45 stages using Dormand-Prince coefficients.
@@ -46,7 +35,7 @@ def compute_stages(
 
     for i in range(7):
 
-        t_i = time + DOPRI_C[i] * step
+        t_i = t + DOPRI_C[i] * step
         y_i = y.copy()
 
         for j, stage in enumerate(stages[:i]):
@@ -55,13 +44,13 @@ def compute_stages(
 
         if parameters is None:
 
-            stage = array(object=fun(t_i, y_i))
+            stage = array(object=fun(t_i, y_i), dtype=complex)
 
         else:
 
-            stage = array(object=fun(t_i, parameters, y_i))
+            stage = array(object=fun(t_i, parameters, y_i), dtype=complex)
 
-        if not prod(isfinite(stage)):
+        if inf in stage:
 
             raise ValueError(f"Stage {i} produced non-finite values: {stage}")
 
@@ -113,24 +102,24 @@ def adaptive_runge_kutta_45(
     """
 
     _, t_end, max_dt = t_bounds
-    time = [t_bounds[0]]
+    t = [t_bounds[0]]
     step = max_dt if max_dt is not None else (t_end - t_bounds[0]) / FIRST_STEP_FACTOR
     max_step = (t_end - t_bounds[0]) / 2
-    y = [y_0.astype(complex128 if iscomplexobj(y_0) else float64)]
+    y = [y_0.astype(dtype=complex128 if iscomplexobj(y_0) else float64)]
 
-    while time[-1] < t_bounds[1]:
+    while t[-1] < t_bounds[1]:
 
-        if time[-1] + step > t_end:
+        if t[-1] + step > t_end:
 
-            step = t_end - time[-1]
+            step = t_end - t[-1]
 
-        stages = compute_stages(fun=fun, time=time[-1], step=step, y=y[-1])
+        stages = compute_stages(fun=fun, t=t[-1], step=step, y=y[-1])
         y_high = estimate_solution(y=y[-1], stages=stages, step=step, b_coeffs=DOPRI_B)
         y_low = estimate_solution(y=y[-1], stages=stages, step=step, b_coeffs=DOPRI_B_ALT)
 
-        if not prod(isfinite(y_high)):
+        if inf in y_high:
 
-            raise OverflowError(f"y_high overflowed at time={time[-1]}, step={step}, y={y[-1]}")
+            raise OverflowError(f"y_high overflowed at t={t[-1]}, step={step}, y={y[-1]}")
 
         error_ratio = compute_error_ratio(y=y[-1], y_high=y_high, y_low=y_low, rtol=rtol, atol=atol)
 
@@ -140,7 +129,7 @@ def adaptive_runge_kutta_45(
 
         if error_ratio <= 1.0:
 
-            time.append(time[-1] + step)
+            t.append(t[-1] + step)
             y.append(y_high)
 
         # Default RK45 step factor adjustment with safety margin.
@@ -150,7 +139,9 @@ def adaptive_runge_kutta_45(
         )
         step = step if max_dt is None else min(max_dt, step)
 
-    return array(object=time), array(object=y)
+    return array(object=t, dtype=complex128 if iscomplexobj(y_0) else float64), array(
+        object=y, dtype=complex128 if iscomplexobj(y_0) else float64
+    )
 
 
 def non_adaptive_runge_kutta_45(
@@ -158,7 +149,7 @@ def non_adaptive_runge_kutta_45(
 ) -> ndarray:
     """
     Non-adaptive RK45 solver using Dormand-Prince coefficients for a parameterized function.
-    Computes solution at the given time points t.
+    Computes solution at the given t points.
     """
 
     if len(t) < 2:
@@ -173,7 +164,7 @@ def non_adaptive_runge_kutta_45(
         t_prev = t[k - 1]
         t_next = t[k]
         step = t_next - t_prev
-        stages = compute_stages(fun=fun, time=t_prev, step=step, y=y, parameters=parameters[k - 1])
+        stages = compute_stages(fun=fun, t=t_prev, step=step, y=y, parameters=parameters[k - 1])
         y = estimate_solution(y=y, stages=stages, step=step, b_coeffs=DOPRI_B)
         y_tab.append(y)
 

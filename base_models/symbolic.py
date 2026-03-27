@@ -103,4 +103,6 @@ def fixed_timestep_integrator(
         # Because dx^i/dx^i_0(t=0) := 1.
         y_0[i_parameter_initial_conditions] = 1
 
+    # Here, parameter represent what parameterizes a function call. In the case of the variation
+    # equations, this is the already integrated state.
     return non_adaptive_runge_kutta_45(fun=fun, t=t, y_0=y_0, parameters=y)

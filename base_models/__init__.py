@@ -11,6 +11,7 @@ from .paths import (
     LOGS_PATH,
     LOVE_NUMBERS_PATH,
     SOLID_EARTH_MODEL_PROFILES,
+    TEST_FIGURES_PATH,
     TEST_PATH,
     SolidEarthModelPart,
 )
@@ -57,6 +58,7 @@ to_import = [
     LOGS_PATH,
     LOVE_NUMBERS_PATH,
     SOLID_EARTH_MODEL_PROFILES,
+    TEST_FIGURES_PATH,
     TEST_PATH,
     SolidEarthModelPart,
     adaptive_runge_kutta_45,
