@@ -4,7 +4,7 @@ Custom RK45 numerical integration scheme thread-safe and multiprocess-safe.
 
 from typing import Callable, Optional
 
-from numpy import array, complex128, float64, inf, iscomplexobj, isinf, isnan, maximum, ndarray
+from numpy import array, inf, isinf, isnan, maximum, ndarray
 
 FIRST_STEP_FACTOR = 1e-10
 
@@ -44,11 +44,11 @@ def compute_stages(
 
         if parameters is None:
 
-            stage = array(object=fun(t_i, y_i), dtype=complex)
+            stage = array(object=fun(t_i, y_i), dtype=y_i.dtype)
 
         else:
 
-            stage = array(object=fun(t_i, parameters, y_i), dtype=complex)
+            stage = array(object=fun(t_i, parameters, y_i), dtype=y_i.dtype)
 
         if inf in stage:
 
@@ -105,7 +105,7 @@ def adaptive_runge_kutta_45(
     t = [t_bounds[0]]
     step = max_dt if max_dt is not None else (t_end - t_bounds[0]) / FIRST_STEP_FACTOR
     max_step = (t_end - t_bounds[0]) / 2
-    y = [y_0.astype(dtype=complex128 if iscomplexobj(y_0) else float64)]
+    y = [y_0]
 
     while t[-1] < t_bounds[1]:
 
@@ -139,9 +139,7 @@ def adaptive_runge_kutta_45(
         )
         step = step if max_dt is None else min(max_dt, step)
 
-    return array(object=t, dtype=complex128 if iscomplexobj(y_0) else float64), array(
-        object=y, dtype=complex128 if iscomplexobj(y_0) else float64
-    )
+    return array(object=t), array(object=y)
 
 
 def non_adaptive_runge_kutta_45(
@@ -156,7 +154,7 @@ def non_adaptive_runge_kutta_45(
 
         return array(object=[y_0])
 
-    y = y_0.astype(complex128 if iscomplexobj(y_0) else float64)
+    y = y_0
     y_tab = [y]
 
     for k in range(1, len(t)):

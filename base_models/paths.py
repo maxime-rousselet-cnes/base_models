@@ -11,10 +11,10 @@ class SolidEarthModelPart(Enum):
     Available model parts.
     """
 
-    attenuation = "attenuation"
-    elastic = "elastic"
-    transient = "transient"
-    viscous = "viscous"
+    ATTENUATION = "attenuation"
+    ELASTIC = "elastic"
+    TRANSIENT = "transient"
+    VISCOUS = "viscous"
 
 
 DEFAULT_MODELS: dict[str, str] = {

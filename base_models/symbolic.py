@@ -94,7 +94,7 @@ def fixed_timestep_integrator(
     Performs the numerical quadrature of partial derivatives over the integration's points.
     """
 
-    y_0 = zeros(shape=system_dimension)
+    y_0 = zeros(shape=system_dimension, dtype=complex)
 
     if (
         i_parameter_initial_conditions is not None
