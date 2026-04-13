@@ -94,15 +94,15 @@ def fixed_timestep_integrator(
     Performs the numerical quadrature of partial derivatives over the integration's points.
     """
 
-    y_0 = zeros(shape=system_dimension, dtype=complex)
+    dy_dgamma_0 = zeros(shape=system_dimension, dtype=complex)
 
     if (
         i_parameter_initial_conditions is not None
     ) and i_parameter_initial_conditions < system_dimension:
 
         # Because dx^i/dx^i_0(t=0) := 1.
-        y_0[i_parameter_initial_conditions] = 1
+        dy_dgamma_0[i_parameter_initial_conditions] = 1
 
     # Here, parameter represent what parameterizes a function call. In the case of the variation
     # equations, this is the already integrated state.
-    return non_adaptive_runge_kutta_45(fun=fun, t=t, y_0=y_0, parameters=y)
+    return non_adaptive_runge_kutta_45(fun=fun, t=t, dy_dgamma_0=dy_dgamma_0, y=y)

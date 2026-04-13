@@ -9,7 +9,7 @@ from numpy import array, inf, isinf, isnan, maximum, ndarray
 FIRST_STEP_FACTOR = 1e-10
 
 # Dormand-Prince coefficients for RK45.
-DOPRI_C = array([0, 1 / 5, 3 / 10, 4 / 5, 8 / 9, 1.0, 1.0])
+DOPRI_C = array(object=[0, 1 / 5, 3 / 10, 4 / 5, 8 / 9, 1.0, 1.0], dtype=float)
 DOPRI_A = [
     [],
     [1 / 5],
@@ -19,12 +19,19 @@ DOPRI_A = [
     [9017 / 3168, -355 / 33, 46732 / 5247, 49 / 176, -5103 / 18656],
     [35 / 384, 0, 500 / 1113, 125 / 192, -2187 / 6784, 11 / 84],
 ]
-DOPRI_B = array([35 / 384, 0, 500 / 1113, 125 / 192, -2187 / 6784, 11 / 84, 0])
-DOPRI_B_ALT = array([5179 / 57600, 0, 7571 / 16695, 393 / 640, -92097 / 339200, 187 / 2100, 1 / 40])
+DOPRI_B = array(object=[35 / 384, 0, 500 / 1113, 125 / 192, -2187 / 6784, 11 / 84, 0], dtype=float)
+DOPRI_B_ALT = array(
+    object=[5179 / 57600, 0, 7571 / 16695, 393 / 640, -92097 / 339200, 187 / 2100, 1 / 40],
+    dtype=float,
+)
 
 
 def compute_stages(
-    fun: Callable, t: float, step: float, y: ndarray, parameters: Optional[ndarray] = None
+    fun: Callable,
+    t: float,
+    step: float,
+    y: ndarray,
+    arguments: tuple[Optional[tuple[ndarray, ndarray]], tuple] = (None, ()),
 ) -> list[ndarray]:
     """
     Compute intermediate RK45 stages using Dormand-Prince coefficients.
@@ -32,6 +39,7 @@ def compute_stages(
     """
 
     stages = []
+    parameters, arguments = arguments
 
     for i in range(7):
 
@@ -44,15 +52,13 @@ def compute_stages(
 
         if parameters is None:
 
-            stage = array(object=fun(t_i, y_i), dtype=y_i.dtype)
+            stages.append(array(object=fun(t_i, y_i, *arguments), dtype=y_i.dtype))
+
         else:
 
-            # Linear interpolation of y between step start and end.
             p_start, p_end = parameters
             p_i = p_start + DOPRI_C[i] * (p_end - p_start)
-            stage = array(object=fun(t_i, p_i, y_i), dtype=y_i.dtype)
-
-        stages.append(stage)
+            stages.append(array(object=fun(t_i, p_i, y_i, *arguments), dtype=y_i.dtype))
 
     return stages
 
@@ -92,8 +98,8 @@ def adaptive_runge_kutta_45(
     t_bounds: tuple[float, float, Optional[float]],  # t_0, t_end, max_dt.
     y_0: ndarray,
     # The solver keeps the local error estimates under atol + rtol * abs(yr).
-    atol: float = 1.0e-14,
-    rtol: float = 1.0e-10,
+    tolerances: tuple[float, float] = (1.0e-14, 1.0e-10),  # atol, rtol.
+    arguments: tuple = (),
 ) -> tuple[ndarray, ndarray]:
     """
     Adaptive Runge-Kutta-Fehlberg (RK45) ODE solver with overflow and instability protection.
@@ -103,6 +109,7 @@ def adaptive_runge_kutta_45(
     t = [t_bounds[0]]
     step = max_dt if max_dt is not None else (t_end - t_bounds[0]) / FIRST_STEP_FACTOR
     max_step = (t_end - t_bounds[0]) / 2
+    max_step = max_step if max_dt is None else min(max_dt, max_step)
     y = [y_0]
 
     while t[-1] < t_bounds[1]:
@@ -111,7 +118,7 @@ def adaptive_runge_kutta_45(
 
             step = t_end - t[-1]
 
-        stages = compute_stages(fun=fun, t=t[-1], step=step, y=y[-1])
+        stages = compute_stages(fun=fun, t=t[-1], step=step, y=y[-1], arguments=(None, arguments))
         y_high = estimate_solution(y=y[-1], stages=stages, step=step, b_coeffs=DOPRI_B)
         y_low = estimate_solution(y=y[-1], stages=stages, step=step, b_coeffs=DOPRI_B_ALT)
 
@@ -119,7 +126,9 @@ def adaptive_runge_kutta_45(
 
             raise OverflowError(f"y_high overflowed at t={t[-1]}, step={step}, y={y[-1]}")
 
-        error_ratio = compute_error_ratio(y=y[-1], y_high=y_high, y_low=y_low, rtol=rtol, atol=atol)
+        error_ratio = compute_error_ratio(
+            y=y[-1], y_high=y_high, y_low=y_low, rtol=tolerances[1], atol=tolerances[0]
+        )
 
         if isnan(error_ratio) or isinf(error_ratio):
 
@@ -132,7 +141,10 @@ def adaptive_runge_kutta_45(
 
         # Default RK45 step factor adjustment with safety margin.
         step = min(
-            step * min(4.0, max(0.1, 0.9 * error_ratio ** (-0.25) if error_ratio > atol else 2.0)),
+            step
+            * min(
+                4.0, max(0.1, 0.9 * error_ratio ** (-0.25) if error_ratio > tolerances[0] else 2.0)
+            ),
             max_step,
         )
         step = step if max_dt is None else min(max_dt, step)
@@ -141,7 +153,11 @@ def adaptive_runge_kutta_45(
 
 
 def non_adaptive_runge_kutta_45(
-    fun: Callable[[float, ndarray, ndarray], ndarray], t: ndarray, y_0: ndarray, parameters: ndarray
+    fun: Callable[[float, ndarray, ndarray], ndarray],
+    t: ndarray,
+    dy_dgamma_0: ndarray,
+    y: ndarray,
+    arguments: tuple = (),
 ) -> ndarray:
     """
     Non-adaptive RK45 solver using Dormand-Prince coefficients for a parameterized function.
@@ -150,24 +166,23 @@ def non_adaptive_runge_kutta_45(
 
     if len(t) < 2:
 
-        return array(object=[y_0])
+        return array(object=[dy_dgamma_0])
 
-    y = y_0
-    y_tab = [y]
+    dy_dgamma = dy_dgamma_0
+    dy_dgamma_tab = [dy_dgamma]
 
     for k in range(1, len(t)):
 
         t_prev = t[k - 1]
-        t_next = t[k]
-        step = t_next - t_prev
+        step = t[k] - t_prev
         stages = compute_stages(
             fun=fun,
             t=t_prev,
             step=step,
-            y=y,
-            parameters=(parameters[k - 1], parameters[k]),  # Pass both endpoints.
+            y=dy_dgamma,
+            arguments=((y[k - 1], y[k]), arguments),
         )
-        y = estimate_solution(y=y, stages=stages, step=step, b_coeffs=DOPRI_B)
-        y_tab.append(y)
+        dy_dgamma = estimate_solution(y=dy_dgamma, stages=stages, step=step, b_coeffs=DOPRI_B)
+        dy_dgamma_tab.append(dy_dgamma)
 
-    return array(object=y_tab)
+    return array(object=dy_dgamma_tab)
