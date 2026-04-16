@@ -23,7 +23,6 @@ def evaluate_terminal_parameters(
         rule={
             parameter_expressions[parameter_name]: value
             for parameter_name, value in terminal_parameter_values.items()
-            if parameter_name in parameter_expressions
         }
     )
 
