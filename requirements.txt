@@ -4,5 +4,6 @@ numpy
 pydantic
 pylint
 pytest
+scipy
 setuptools
 sympy
