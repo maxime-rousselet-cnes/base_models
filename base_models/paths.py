@@ -41,7 +41,7 @@ INPUTS_PATH = DATA_PATH.joinpath("inputs")
 OUTPUTS_PATH = DATA_PATH.joinpath("outputs")
 
 ### Love numbers.
-LOVE_NUMBERS_PATH = OUTPUTS_PATH.joinpath("love_numbers")
+LOVE_NUMBERS_PATH = OUTPUTS_PATH.joinpath("Love_numbers")
 
 ### Parallel computing logs.
 LOGS_PATH = OUTPUTS_PATH.joinpath("logs")

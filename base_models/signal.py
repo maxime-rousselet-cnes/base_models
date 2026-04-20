@@ -2,7 +2,7 @@
 Usefull functions to manipulate Fourier transforms of steady-state regime signals.
 """
 
-from numpy import arange, concatenate, empty_like, linspace, ndarray
+from numpy import arange, concatenate, linspace, ndarray, zeros_like
 from scipy.interpolate import lagrange
 
 
@@ -74,7 +74,7 @@ def lagrange_order4(x: ndarray[float], y: ndarray[float], new_x: ndarray[float])
     """
 
     n = len(x)
-    new_y = empty_like(new_x, dtype=float)
+    new_y = zeros_like(a=new_x, dtype=float)
     i = 0
 
     for j, nx in enumerate(new_x):
