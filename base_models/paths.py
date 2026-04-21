@@ -37,11 +37,5 @@ TEST_FIGURES_PATH = TEST_PATH.joinpath("figures")
 ## Inputs.
 INPUTS_PATH = DATA_PATH.joinpath("inputs")
 
-## Outputs.
-OUTPUTS_PATH = DATA_PATH.joinpath("outputs")
-
-### Love numbers.
-LOVE_NUMBERS_PATH = OUTPUTS_PATH.joinpath("Love_numbers")
-
-### Parallel computing logs.
-LOGS_PATH = OUTPUTS_PATH.joinpath("logs")
+## Love numbers.
+LOVE_NUMBERS_PATH = DATA_PATH.joinpath("love_numbers")
