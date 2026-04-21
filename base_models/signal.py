@@ -71,7 +71,8 @@ def build_steady_state_regime_signal(
                 arange(
                     start=t[-1] + time_step,
                     stop=t[-1]
-                    + (cubic_spline_length + len(t) + plateau_length_in_samples) * time_step,
+                    + (cubic_spline_length_in_samples + len(t) + plateau_length_in_samples)
+                    * time_step,
                     step=time_step,
                 ),
             )
