@@ -68,7 +68,7 @@ def build_steady_state_regime_signal(
     )
 
 
-def lagrange_order4(x: ndarray[float], y: ndarray[float], new_x: ndarray[float]) -> ndarray[float]:
+def lagrange_order4(x: ndarray, y: ndarray, new_x: ndarray) -> ndarray:
     """
     Order-4 Lagrange interpolation (5-point) with automatic selection.
     """
