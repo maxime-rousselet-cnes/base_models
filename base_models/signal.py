@@ -2,8 +2,16 @@
 Usefull functions to manipulate Fourier transforms of steady-state regime signals.
 """
 
+from dataclasses import dataclass
+
 from numpy import arange, concatenate, linspace, ndarray, zeros_like
 from scipy.interpolate import lagrange
+
+
+@dataclass
+class SteadyStateSignalParameters:
+    cubic_spline_length: float = 50.0
+    plateau_length: float = 500.0
 
 
 def cubic_spline_connection(
@@ -43,7 +51,7 @@ def pad_signal(signal: ndarray, plateau_length: int) -> ndarray:
 
 def build_steady_state_regime_signal(
     t: ndarray, signal: ndarray, plateau_length: float, cubic_spline_length: float
-) -> tuple[ndarray, ndarray]:
+) -> tuple[int, ndarray, ndarray]:
     """
     Build a steady-state regime model of a given signal.
     """
@@ -52,19 +60,26 @@ def build_steady_state_regime_signal(
     plateau_length_in_samples = int(plateau_length / time_step)
     cubic_spline_length_in_samples = int(cubic_spline_length / time_step)
 
-    return concatenate(
-        (
-            arange(start=t[0] - plateau_length_in_samples * time_step, stop=t[0], step=time_step),
-            t,
-            arange(
-                start=t[-1] + time_step,
-                stop=t[-1] + (cubic_spline_length + len(t) + plateau_length_in_samples) * time_step,
-                step=time_step,
-            ),
-        )
-    ), make_antisymmetric(
-        signal=pad_signal(signal=signal, plateau_length=plateau_length_in_samples),
-        cubic_spline_length=cubic_spline_length_in_samples,
+    return (
+        plateau_length_in_samples,
+        concatenate(
+            (
+                arange(
+                    start=t[0] - plateau_length_in_samples * time_step, stop=t[0], step=time_step
+                ),
+                t,
+                arange(
+                    start=t[-1] + time_step,
+                    stop=t[-1]
+                    + (cubic_spline_length + len(t) + plateau_length_in_samples) * time_step,
+                    step=time_step,
+                ),
+            )
+        ),
+        make_antisymmetric(
+            signal=pad_signal(signal=signal, plateau_length=plateau_length_in_samples),
+            cubic_spline_length=cubic_spline_length_in_samples,
+        ),
     )
 
 

@@ -15,7 +15,7 @@ from .paths import (
     SolidEarthModelPart,
 )
 from .runge_kutta_scheme import adaptive_runge_kutta_45, non_adaptive_runge_kutta_45
-from .signal import build_steady_state_regime_signal, lagrange_order4
+from .signal import SteadyStateSignalParameters, build_steady_state_regime_signal, lagrange_order4
 from .symbolic import (
     evaluate_terminal_parameters,
     fixed_timestep_integrator,
@@ -62,6 +62,7 @@ to_import = [
     SolidEarthModelPart,
     adaptive_runge_kutta_45,
     non_adaptive_runge_kutta_45,
+    SteadyStateSignalParameters,
     build_steady_state_regime_signal,
     lagrange_order4,
     evaluate_terminal_parameters,
