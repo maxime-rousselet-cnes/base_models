@@ -17,14 +17,13 @@ class SolidEarthModelPart(Enum):
     VISCOUS = "viscous"
 
 
-DEFAULT_MODELS = {
+MODELS = {
     "elastic": "PREM",
-    "attenuation": "uniform",
-    "transient": "reference",
-    "viscous": "uniform",
+    "attenuation": "Resovsky_upper_uniform_lower",
+    "transient": "Post_sismo_upper_uniform_lower",
+    "viscous": "VM7",
 }
-MODELS = {"elastic": "PREM", "attenuation": "uniform", "transient": "reference", "viscous": "VM7"}
-SOLID_EARTH_MODEL_PROFILES = DEFAULT_MODELS.keys()
+SOLID_EARTH_MODEL_PROFILES = MODELS.keys()
 
 # Contains both inputs and outputs.
 DATA_PATH_TXT_PATH = Path("..")

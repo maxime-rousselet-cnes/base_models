@@ -7,7 +7,6 @@ from enum import Enum
 from .database import load_base_model, load_complex_array, save_base_model, save_complex_array
 from .paths import (
     DATA_PATH,
-    DEFAULT_MODELS,
     FIGURES_PATH,
     MODELS,
     SOLID_EARTH_MODEL_PROFILES,
@@ -54,7 +53,6 @@ to_import = [
     save_base_model,
     save_complex_array,
     DATA_PATH,
-    DEFAULT_MODELS,
     MODELS,
     SOLID_EARTH_MODEL_PROFILES,
     FIGURES_PATH,
